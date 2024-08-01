@@ -16,7 +16,7 @@ def enviar():
     idNumeroTeléfono=facebook_id_number
     
     #TELEFONO QUE RECIBE (EL DE NOSOTROS QUE DIMOS DE ALTA)
-    telefonoEnvia='527122264370'
+    telefonoEnvia='8295082211'
     
     #MENSAJE A ENVIAR
     textoMensaje="Hola Mundo";
