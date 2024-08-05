@@ -1,0 +1,23 @@
++ [*] (hola|saludos|buenas tardes|buenas noches|buenos dias) [*]
+- Hola, soy el asistente virtual de clínica San Juan.\n\n
+^ Como podemos ayudarte ?\n
+^ Nuestros horarios de atención son:\n\n
+^ lunes a viernes de 8:00 AM hasta 10:00 PM\n\n
+^ sabados de 9:00 AM hasta 2:00 PM\n\n
+
++ [*] (cita|citas|programar|agendar) [*]
+- Claro, ¿quieres agendar una cita?\n\n
+^ Dime que dia de deseas agendar:\n\n
+^ lunes\n\nmartes\n\nmiercoles\n\n
+
++ lunes
+- Tenemos 10 cupos disponibles. Deseas agendar para este dia ?
+
++ martes
+- Tenemos 10 cupos disponibles. Deseas agendar para este dia ?
+
++ miercoles
+- Tenemos 10 cupos disponibles. Deseas agendar para este dia ?
+
++ *
+- Disculpa, no comprendo lo que intentas decir. Intenta de nuevo.

@@ -1,40 +1,64 @@
 from flask import Flask, jsonify, request
-#LIBRERIAS PARA ENVIAR MENSAJES VIA WHTSAPP
-from heyoo import WhatsApp
-app = Flask(__name__)
+import http.client
+import json
+from rivescript import RiveScript
 
-access_token = 'EAANAKuhPhaIBO6Y1O7jE6BPrQV6rpkG1gdLdJskIoZA4p5tvO6GDl2KPVjZARXrvpLXrL43UGzRudYYevW4diBucEze2GKZBcI05c1WUvI03DBd2HPZATVUzVUTBRR7y7ZASkiyxi9GwYWyV5ZAvLnoHLjQM4QUpa0HkdNDNt9cS9UZCrcdzb1s3scKkpEPuWL8KN7LV4cVVV5ydAuS';
-facebook_id_number = '420616191126433';
+app=Flask(__name__)
+bot=RiveScript();
+token="EAANAKuhPhaIBOxba6ZCcMZCNS9IVlgf5yKgFQmwPHHTQnc10ycyqD5HlZBRfM0UQ3CGolZAZCeKBcEeiJB9purOazQukgjKH60IRMh7eN7wFXks3PCuyTeCxgndwSjEdrsqabnK2rKYZBV5TTPZBI7Cjo4kxZAmxotT8pS9aHAvGu5GYmPh2SDS1FheY2ctobRRKf8iMr4gAnBo23AIZD"
 
-#EJECUTAMOS ESTE CODIGO CUANDO SE INGRESE A LA RUTA ENVIAR
-@app.route("/enviar/", methods=["POST", "GET"])
-def enviar():
-    #TOKEN DE ACCESO DE FACEBOOK
-    token=access_token
+def send_message(mensajeRespuesta):
+    if not mensajeRespuesta:
+        return jsonify({'error': 'No JSON received'}), 400
     
-    #IDENTIFICADOR DE NÚMERO DE TELÉFONO
-    idNumeroTeléfono=facebook_id_number
+    url = "graph.facebook.com"  
     
-    #TELEFONO QUE RECIBE (EL DE NOSOTROS QUE DIMOS DE ALTA)
-    telefonoEnvia='8295082211'
+    conn=http.client.HTTPSConnection(url, None)
     
-    #MENSAJE A ENVIAR
-    textoMensaje="Hola Mundo";
-    
-    #URL DE LA IMAGEN A ENVIAR
-    #urlImagen='https://i.imgur.com/r5lhxgn.png'
-    
-    #INICIALIZAMOS ENVIO DE MENSAJES
-    mensajeWa=WhatsApp(token,idNumeroTeléfono)
-    
-    #ENVIAMOS UN MENSAJE DE TEXTO
-    mensajeWa.send_message(textoMensaje,telefonoEnvia)
-    
-    #ENVIAMOS UNA IMAGEN
-    #mensajeWa.send_image(image=urlImagen,recipient_id=telefonoEnvia,)
-    
-    return "mensaje enviado exitosamente"
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}"  
+    }
 
-#INICIAMSO FLASK
+    data=json.dumps({
+        "messaging_product": "whatsapp",
+        "to": "18295082211",
+        "type": "text", 
+        "text": {
+            "body": mensajeRespuesta
+        }
+    })
+
+    try:
+        conn.request('POST', '/v20.0/420616191126433/messages', body=data, headers=headers)
+        response = conn.getresponse()
+        print(response.status, response.reason)
+        print(response.read().decode())
+        conn.close()
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/webhook/", methods=["POST", "GET"])
+def webhook_whatsapp():
+    
+    if request.method == "GET":
+        if request.args.get('hub.verify_token') == "HolaNovato":
+            return request.args.get('hub.challenge')
+        else:
+          return "Error de autentificacion."
+    
+    data=request.get_json()
+    if data is not None:
+        telefonoCliente=data['entry'][0]['changes'][0]['value']['messages'][0]['from']
+        mensaje=data['entry'][0]['changes'][0]['value']['messages'][0]['text']['body']
+        idWA=data['entry'][0]['changes'][0]['value']['messages'][0]['id']
+        timestamp=data['entry'][0]['changes'][0]['value']['messages'][0]['timestamp']
+        bot.load_file('automation_whatsapp/brain.rive')
+        bot.sort_replies()
+        botMsg = bot.reply('localuser', mensaje)
+        send_message(botMsg)
+    return jsonify({"status": "success"}, 200)
+
 if __name__ == "__main__":
+  #app.run(debug=True, host='0.0.0.0', port=5001)
   app.run(debug=True)
